@@ -1,1 +1,5 @@
-title: J Kang's Vlog
+title: J Kang's Personal Vlog
+description: My thoughts, goals, reviews on books, movies, and random things.
+theme: minima
+minima:
+  skin: dark
