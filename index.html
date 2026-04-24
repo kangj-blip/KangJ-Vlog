@@ -12,6 +12,7 @@
       --muted: #9aa3b2;
       --accent: #7c9cff;
       --border: #262b36;
+      --danger: #ff6b6b;
     }
 
     * { box-sizing: border-box; }
@@ -65,11 +66,6 @@
       transition: 0.2s ease;
     }
 
-    .post:hover {
-      border-color: var(--accent);
-      transform: translateY(-2px);
-    }
-
     .post-title {
       font-size: 18px;
       font-weight: 600;
@@ -84,6 +80,7 @@
 
     .post-content {
       white-space: pre-wrap;
+      margin-bottom:12px;
     }
 
     .editor {
@@ -119,6 +116,31 @@
       font-weight: 500;
     }
 
+    .controls {
+      display:flex;
+      gap:8px;
+    }
+
+    .edit-btn {
+      background:transparent;
+      border:1px solid var(--border);
+      color:var(--muted);
+      padding:6px 10px;
+      border-radius:8px;
+      cursor:pointer;
+      font-size:12px;
+    }
+
+    .delete-btn {
+      background:transparent;
+      border:1px solid #3a1f1f;
+      color:var(--danger);
+      padding:6px 10px;
+      border-radius:8px;
+      cursor:pointer;
+      font-size:12px;
+    }
+
     .footer {
       text-align: center;
       color: var(--muted);
@@ -140,10 +162,10 @@
 <main>
 
 <div id="editor" class="editor">
-  <strong>New Post</strong>
+  <strong id="editor-title">New Post</strong>
   <input id="title" placeholder="Title" />
   <textarea id="content" placeholder="Write your vlog..."></textarea>
-  <button class="publish" onclick="addPost()">Publish</button>
+  <button class="publish" onclick="savePost()">Publish</button>
 </div>
 
 <div id="posts"></div>
@@ -156,6 +178,9 @@
 
 const ADMIN_PASSWORD = "Kang2007";
 
+let adminUnlocked = false;
+let editingIndex = null;
+
 const posts = [
   {
     title: "First Post",
@@ -167,33 +192,59 @@ const posts = [
 function unlock() {
   const pass = prompt("password");
   if (pass === ADMIN_PASSWORD) {
+    adminUnlocked = true;
     document.getElementById("editor").style.display = "block";
+    render();
   }
 }
 
-function addPost() {
+function savePost() {
   const title = document.getElementById("title").value.trim();
   const content = document.getElementById("content").value.trim();
 
   if (!title || !content) return;
 
-  posts.unshift({
-    title,
-    content,
-    date: new Date().toLocaleString()
-  });
-
-  render();
+  if (editingIndex !== null) {
+    posts[editingIndex].title = title;
+    posts[editingIndex].content = content;
+    editingIndex = null;
+    document.getElementById("editor-title").innerText = "New Post";
+  } else {
+    posts.unshift({
+      title,
+      content,
+      date: new Date().toLocaleString()
+    });
+  }
 
   document.getElementById("title").value = "";
   document.getElementById("content").value = "";
+
+  render();
+}
+
+function editPost(index) {
+  const post = posts[index];
+  editingIndex = index;
+
+  document.getElementById("title").value = post.title;
+  document.getElementById("content").value = post.content;
+  document.getElementById("editor-title").innerText = "Edit Post";
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function deletePost(index) {
+  if (!confirm("delete this post?")) return;
+  posts.splice(index, 1);
+  render();
 }
 
 function render() {
   const container = document.getElementById("posts");
   container.innerHTML = "";
 
-  posts.forEach(post => {
+  posts.forEach((post, index) => {
     const el = document.createElement("div");
     el.className = "post";
 
@@ -201,6 +252,12 @@ function render() {
       <div class="post-title">${post.title}</div>
       <div class="post-date">${post.date}</div>
       <div class="post-content">${post.content}</div>
+      ${adminUnlocked ? `
+        <div class="controls">
+          <button class="edit-btn" onclick="editPost(${index})">edit</button>
+          <button class="delete-btn" onclick="deletePost(${index})">delete</button>
+        </div>
+      ` : ``}
     `;
 
     container.appendChild(el);
