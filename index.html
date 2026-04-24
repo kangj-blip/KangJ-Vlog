@@ -32,18 +32,22 @@
       border-bottom: 1px solid var(--border);
       padding: 18px 24px;
       z-index: 10;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
     }
 
-    .title {
-      font-size: 20px;
-      font-weight: 600;
-      letter-spacing: 0.3px;
-    }
+    .title { font-size: 20px; font-weight: 600; }
+    .subtitle { font-size: 13px; color: var(--muted); }
 
-    .subtitle {
-      font-size: 13px;
-      color: var(--muted);
-      margin-top: 2px;
+    .admin-btn {
+      font-size:12px;
+      background:none;
+      border:1px solid var(--border);
+      color:var(--muted);
+      padding:6px 10px;
+      border-radius:8px;
+      cursor:pointer;
     }
 
     main {
@@ -82,15 +86,9 @@
       white-space: pre-wrap;
     }
 
-    .footer {
-      text-align: center;
-      color: var(--muted);
-      font-size: 12px;
-      margin-top: 40px;
-    }
-
-    .new-post {
-      margin-bottom: 30px;
+    .editor {
+      display:none;
+      margin-bottom:30px;
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 14px;
@@ -109,12 +107,9 @@
       font-size: 14px;
     }
 
-    textarea {
-      min-height: 120px;
-      resize: vertical;
-    }
+    textarea { min-height: 120px; resize: vertical; }
 
-    button {
+    button.publish {
       background: var(--accent);
       border: none;
       color: white;
@@ -124,45 +119,56 @@
       font-weight: 500;
     }
 
-    button:hover {
-      opacity: 0.9;
-    }
-
-    .note {
-      font-size: 12px;
+    .footer {
+      text-align: center;
       color: var(--muted);
-      margin-top: 8px;
+      font-size: 12px;
+      margin-top: 40px;
     }
   </style>
 </head>
 <body>
 
 <header>
-  <div class="title">My Personal Vlog</div>
-  <div class="subtitle">thoughts, logs, random things</div>
+  <div>
+    <div class="title">J Kang's Personal Vlog</div>
+    <div class="subtitle">My thoughts, goals, reviews on books, movies, and random things.</div>
+  </div>
+  <button class="admin-btn" onclick="unlock()">admin</button>
 </header>
 
 <main>
 
-  <div class="new-post">
-    <strong>New Post</strong>
-    <input id="title" placeholder="Title" />
-    <textarea id="content" placeholder="Write your vlog..."></textarea>
-    <button onclick="addPost()">Publish</button>
-    <div class="note">Posts are saved locally in your browser. To permanently publish, copy them into the code.</div>
-  </div>
+<div id="editor" class="editor">
+  <strong>New Post</strong>
+  <input id="title" placeholder="Title" />
+  <textarea id="content" placeholder="Write your vlog..."></textarea>
+  <button class="publish" onclick="addPost()">Publish</button>
+</div>
 
-  <div id="posts"></div>
+<div id="posts"></div>
 
-  <div class="footer">hosted on github pages</div>
+<div class="footer">hosted on github pages</div>
 
 </main>
 
 <script>
-const posts = JSON.parse(localStorage.getItem("vlog-posts") || "[]");
 
-function save() {
-  localStorage.setItem("vlog-posts", JSON.stringify(posts));
+const ADMIN_PASSWORD = "Kang2007";
+
+const posts = [
+  {
+    title: "First Post",
+    date: "Welcome",
+    content: "This is your vlog. Edit index.html to remove this post."
+  }
+];
+
+function unlock() {
+  const pass = prompt("password");
+  if (pass === ADMIN_PASSWORD) {
+    document.getElementById("editor").style.display = "block";
+  }
 }
 
 function addPost() {
@@ -177,7 +183,6 @@ function addPost() {
     date: new Date().toLocaleString()
   });
 
-  save();
   render();
 
   document.getElementById("title").value = "";
